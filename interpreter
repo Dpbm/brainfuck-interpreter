@@ -1,0 +1,82 @@
+#!/bin/python3
+import sys
+
+
+class Program:
+    def __init__(self, program):
+        self.program = program
+        self.size = 65535
+        self.memory = [0] * self.size
+        self.pointer = 0
+
+    def move_next(self):
+        if(self.pointer == self.size - 1):
+            self.pointer = 0
+            return
+        self.pointer += 1
+
+    def move_back(self):
+        if(self.pointer == 0):
+            self.pointer = self.size - 1
+            return
+        self.pointer -= 1
+
+    def add(self):
+        self.memory[self.pointer] += 1
+
+    def sub(self):
+        if(self.memory[self.pointer] > 0):
+            self.memory[self.pointer] -= 1
+
+    def show(self):
+        print(chr(self.memory[self.pointer]), end='')
+
+    def read(self):
+        self.memory[self.pointer] = ord(input()[0])
+
+    def loop(self, index):
+
+        while True:
+            if(self.memory[self.pointer] == 1):
+                break
+
+            i = index + 1
+
+            while(self.program[i] != ']'):
+                self.run_command(self.program[i], i)
+                i += 1
+
+    def run_command(self, command, index):
+        possible_commands = {
+            '>': self.move_next,
+            '<': self.move_back,
+            '+': self.add,
+            '-': self.sub,
+            '.': self.show,
+            ',': self.read
+        }
+
+        selected_command = possible_commands.get(command, None)
+
+        if(command == '['):
+            self.loop(index)
+
+        elif(selected_command):
+            selected_command()
+
+    def run(self):
+        for index, command in enumerate(self.program):
+            self.run_command(command, index)
+
+
+if __name__ == '__main__':
+    arguments = sys.argv
+
+    if(len(arguments) < 2 or len(arguments) > 2):
+        print("Usage interpreter file.bf")
+        sys.exit(1)
+
+    file = arguments[-1]
+    with open(file, 'r') as program:
+        brainfuck_program = Program(program.read())
+        brainfuck_program.run()
